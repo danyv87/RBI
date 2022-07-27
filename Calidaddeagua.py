@@ -14,8 +14,8 @@ import os
 
 #pd.set_option("display.max_rows", None, "display.max_columns", None) #para imprimir la totalidad de registros
 absolute_path = os.path.abspath(__file__)
-path= absolute_path + "\\Serie_temporal_Full_Data_data (1).csv"
-path2= absolute_path + "\\Outputs\\"
+path= os.path.dirname(absolute_path) + "\\Serie_temporal_Full_Data_data (1).csv"
+path2= os.path.dirname(absolute_path) + "\\Outputs\\"
 
 #importar csv de la base de datos de calidad de agua de la ITAIPU
 df = pd.read_csv(path,on_bad_lines='skip',sep = ';',decimal=',')
@@ -40,7 +40,6 @@ Param_label_ODS632=['DBO','OxigenoDisuelto','Turbidez','Color','pH','FosforoTota
 for i in range(len(años)):
     for j in range(len(Param_ODS632)):
         df2=df.query("Año == "+ años[i] + " and Grupo == 'Grupo 2' and Variable == '" + Param_ODS632[j] +"'") #Filtrar por variable, grupo y año
-        #df2 = df2.drop(columns=['Day of fecha_muestreo', 'codigo', 'Grupo', 'Variable','Campaña', 'descripcion', 'descripcion_3', 'fecha_fin','fecha_muestreo', 'fecha_realizacion', 'Nombre de muestra','nro_contrato', 'observacion', 'Parametro', 'Profundidad','responsable', 'unidad', 'campanha_id', 'grupo_id', 'id', 'id_2','id_3', 'id_4', 'id_5', 'id_6', 'id_7', 'id_8', 'id_9','muestra_id', 'muestra_id_2', 'Number of Records', 'parametro_id','profundidad_id', 'subvalor_id', 'variable_id', 'Año', 'Mes'])
         if len(df2) != 0:
             df2.to_csv(path2 + Param_label_ODS632[j]+".csv")
             data_gdf = gpd.GeoDataFrame(df2, geometry = gpd.points_from_xy(df2['lng'], df2['lat']))
@@ -64,7 +63,7 @@ for i in range(len(años)):
             idw=[]
 
             #read shapefile
-            shp = gpd.read_file("C:\\Users\\danielal\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\Modelacion Ecohidrologica\\Proyecto_QGIS\\Tetis_Incremental\\layers\\Varios\\Cursos_Otto4ZonalStats2.shp")
+            shp = gpd.read_file(os.path.dirname(absolute_path) + "\\Shps\\Cursos_Otto_RBI_intersectedOtto10_UTM_buffer.shp")
             #shp = "C:\\Users\\danielal\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\Modelacion Ecohidrologica\\Proyecto_QGIS\\Tetis_Incremental\\layers\\Varios\\Cursos_Otto4ZonalStats2.shp"
             #shp.plot()
             #read raster
@@ -113,8 +112,8 @@ for i in range(len(años)):
 
             umbrales_res222 = pd.DataFrame(data2)
 
-            #
-            # Fósforo Total
+            ## Cálculo de indicadores segun resolucion 222/02 de la SEAM
+
 
             df3 = pd.DataFrame()
             if data3['Clase1'][j] != 's/d':
@@ -128,5 +127,3 @@ for i in range(len(años)):
                 #shp['max'] = stats['max']
             shp['Clase s/ res 222/02'] = stats['Clase s/ res 222/02']
             shp.to_file(filename=path2 + años[i] + Param_label_ODS632[j] + '_Res222.shp')
-
-            # Cálculo de indicadores
