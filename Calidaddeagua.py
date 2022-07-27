@@ -9,34 +9,34 @@ from osgeo import gdal
 from rasterstats import zonal_stats
 from affine import Affine
 import rasterio
-
+import os
 
 
 #pd.set_option("display.max_rows", None, "display.max_columns", None) #para imprimir la totalidad de registros
+absolute_path = os.path.abspath(__file__)
+path= absolute_path + "\\Serie_temporal_Full_Data_data (1).csv"
+path2= absolute_path + "\\Outputs\\"
 
-path= "C:\\Users\\danielal\\Downloads\\Serie_temporal_Full_Data_data (1).csv"
-path2= "C:\\Users\\danielal\\Documents\\CIH\\Proyectos\\RBI\\Python\\"
+#importar csv de la base de datos de calidad de agua de la ITAIPU
 df = pd.read_csv(path,on_bad_lines='skip',sep = ';',decimal=',')
 
+#convertir fechas en formato datetime y agregar columnas auxiliares de anho y mes
 TimeConverted=pd.to_datetime(df['fecha_muestreo'])
 TimeConverted_anho=list()
 TimeConverted_month=list()
-
 for time in TimeConverted:
     TimeConverted_anho.append(time.year)
     TimeConverted_month.append(time.month)
-
 df["Año"]=TimeConverted_anho
 df["Mes"]=TimeConverted_month
-
 #table = pd.pivot_table(df,values="valor",index=["fecha_muestreo"],aggfunc=np.sum) #pivotear por fecha
-
 años = ["2015","2016","2017","2018","2021"]
 
 #Definir los parametros para la generación de shapefiles
 Param_ODS632=['DBO-5 (20º C)','Oxígeno Disuelto','Turbidez','Color','pH','Fósforo Total','NTK']
 Param_label_ODS632=['DBO','OxigenoDisuelto','Turbidez','Color','pH','FosforoTotal','NTK']
 
+#
 for i in range(len(años)):
     for j in range(len(Param_ODS632)):
         df2=df.query("Año == "+ años[i] + " and Grupo == 'Grupo 2' and Variable == '" + Param_ODS632[j] +"'") #Filtrar por variable, grupo y año
@@ -51,8 +51,6 @@ for i in range(len(años)):
             data_gdf=[]
 
             ############ GDAL p/ IDW
-            ######### controlar desde aqui 7/15/2022 ultima modificacion
-
             ##reproyectar
             data = gpd.read_file(path2 + años[i] + Param_label_ODS632[j] + '.shp')
             data = data.set_crs(epsg=4326)
@@ -65,15 +63,12 @@ for i in range(len(años)):
             idw= gdal.Grid(path2 + años[i] + Param_label_ODS632[j] + '_UTM.tif',path2 + años[i] + Param_label_ODS632[j] + '_UTM.shp', zfield="valor",algorithm = "invdist:power=3:radius=15000",outputBounds=extentRBI,width = 100, height = 100)
             idw=[]
 
-
-            ##zonalstats
             #read shapefile
             shp = gpd.read_file("C:\\Users\\danielal\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\Modelacion Ecohidrologica\\Proyecto_QGIS\\Tetis_Incremental\\layers\\Varios\\Cursos_Otto4ZonalStats2.shp")
             #shp = "C:\\Users\\danielal\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\Modelacion Ecohidrologica\\Proyecto_QGIS\\Tetis_Incremental\\layers\\Varios\\Cursos_Otto4ZonalStats2.shp"
             #shp.plot()
             #read raster
             tif = rasterio.open(path2 + años[i] + Param_label_ODS632[j] + '_UTM.tif')
-
             #tif2 = gdal.Open(path2 + años[i] + Param_label_ODS632[j] + '_UTM.tif')
 
             #assign raster values to a numpy and array
