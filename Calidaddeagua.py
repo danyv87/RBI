@@ -63,7 +63,7 @@ for i in range(len(años)):
             idw=[]
 
             #read shapefile
-            shp = gpd.read_file(os.path.dirname(absolute_path) + "\\Shps\\Cursos_Otto4ZonalStats2.shp")
+            shp = gpd.read_file(os.path.dirname(absolute_path) + "\\Shps\\Cursos_Otto4ZonalStats2_intersect.shp")
             #shp = "C:\\Users\\danielal\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\Modelacion Ecohidrologica\\Proyecto_QGIS\\Tetis_Incremental\\layers\\Varios\\Cursos_Otto4ZonalStats2.shp"
             #shp.plot()
             #read raster
