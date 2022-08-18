@@ -36,10 +36,13 @@ for i in list3:
      input_raster = gdal.Open(i)
      tif_array = input_raster.ReadAsArray()
      precip_hist[i[-8:-4]] = tif_array
+     affine2 = input_raster.GetGeoTransform()
      input_raster = None
      sum = precip_hist[i[-8:-4]] + sum
 mean = sum/len(precip_hist)
-
+new_affine2 = Affine(affine2[1],affine2[2],affine2[0],affine2[4],affine2[5],affine2[3])
+stats = zonal_stats(shp, tif_array, affine=new_affine2, stats=["max"], all_touched=True)  # se asignan los valores maximos en la intersección con el shapefile
+stats = pd.DataFrame(stats)
 #cálculo de anomalías
 for i in list3:
     if int(i[-8:-4]) >= 2014:
@@ -50,14 +53,11 @@ for i in list3:
         affine = input_raster.transform
         input_raster = None
         #correcciones de affine
-        new_affine = Affine(affine[1], affine[2], affine[0], affine[4], affine[5]*-1, affine[3] + (affine[5] * (tif_array.shape[0]-1)))
         new_affine2 = Affine(affine[0], affine[1], affine[2], affine[3], affine[4], affine[5])
         #cálculo de estadísticas
-        stats = zonal_stats(shp, tif_array, affine=new_affine2, stats=["max"], all_touched=True)  # se asignan los valores maximos en la intersección con el shapefile
-        anomalia = mean - stats
-        anomalia = pd.DataFrame(anomalia)
+        stats2 = zonal_stats(shp, tif_array, affine=new_affine2, stats=["max"], all_touched=True)  # se asignan los valores maximos en la intersección con el shapefile
+        stats2 = pd.DataFrame(stats2)
+        anomalia = stats2 - stats
         #asignar resultados del cálculo de anomalía al shapefile y exportar como csv
         shp['max'] = anomalia['max']
         shp.to_csv(path + 'ChirpsCSV\\' + i[-8:-4] + '_zonal.csv')
-
-
