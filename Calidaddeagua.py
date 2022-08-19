@@ -41,7 +41,7 @@ for i in range(len(años)):
     for j in range(len(Param_ODS632)):
         df2=df.query("Año == "+ años[i] + " and Grupo == 'Grupo 2' and Variable == '" + Param_ODS632[j] +"'") #Filtrar por variable, grupo y año
         if len(df2) != 0:
-            df2.to_csv(path2 + Param_label_ODS632[j]+".csv")
+            #df2.to_csv(path2 + Param_label_ODS632[j]+".csv")
             data_gdf = gpd.GeoDataFrame(df2, geometry = gpd.points_from_xy(df2['lng'], df2['lat']))
             #data_gdf.plot()
             ESRI_WKT = 'GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]]'
@@ -63,7 +63,7 @@ for i in range(len(años)):
             idw=[]
 
             #read shapefile
-            shp = gpd.read_file(os.path.dirname(absolute_path) + "\\Shps\\Cursos_Otto4ZonalStats2_intersect.shp")
+            shp = gpd.read_file(os.path.dirname(absolute_path) + "\\Shps\\Cursos_Otto4ZonalStats2_intersect.shp") #elegir aqui shp curso hídrico según pfastetter o el mismo pero segmentado/intersectado por subcuenca
             #shp = "C:\\Users\\danielal\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\Modelacion Ecohidrologica\\Proyecto_QGIS\\Tetis_Incremental\\layers\\Varios\\Cursos_Otto4ZonalStats2.shp"
             #shp.plot()
             #read raster
@@ -78,15 +78,13 @@ for i in range(len(años)):
             affine=tif.transform
             #affine2=tif2.GetGeoTransform()
 
-            new_affine2 = Affine(affine.a, affine.b, affine.c,affine.d, affine.e*-1, affine.f + (affine.e * (tif.read(1).shape[0]-1))) #https://github.com/perrygeo/python-rasterstats/issues/98
+            new_affine2 = Affine(affine.a, affine.b, affine.c,affine.d, affine.e*-1, affine.f + (affine.e * (tif.read(1).shape[0]-1))) # leer https://github.com/perrygeo/python-rasterstats/issues/98
             #new_affine3 = Affine(affine2[1], affine2[2], affine2[0], affine2[4], affine2[5]*-1, affine2[3] + (affine2[5] * (tif_array2.shape[0]-1))) #https://github.com/perrygeo/python-rasterstats/issues/98
             #show(tif)
             stats=zonal_stats(shp, tif_array_flipped , affine=new_affine2, stats=["max"],all_touched=True) #se asignan los valores maximos en la intersección con el shapefile
             stats = pd.DataFrame(stats)
             shp['max'] = stats['max']
-            shp.to_file(filename=path2 + años[i] + Param_label_ODS632[j] + '_zonal.shp')
-            shp2=shp[["fid", "nunivotcda","cocursodag","cocdadesag", "max"]]
-            shp2.to_csv(path2 + años[i] + Param_label_ODS632[j] + '_zonal.csv')
+            #shp.to_file(filename=path2 + años[i] + Param_label_ODS632[j] + '_zonal.shp')
 
             #definición de umbrales según resolución 222/02 de la SEAM http://www.mades.gov.py/wp-content/uploads/2019/05/Resolucion_222_02-Padr%C3%B3n-de-calidad-de-las-aguas.pdf
                 # Parametro	        Clase 1	    Clase 2	            Clase 3	            Clase 4	        Unidad
@@ -126,4 +124,6 @@ for i in range(len(años)):
                 exec('stats.loc[' + data3['Clase4'][j] + ', "Clase s/ res 222/02"] = "Clase4"')
                 #shp['max'] = stats['max']
             shp['Clase s/ res 222/02'] = stats['Clase s/ res 222/02']
-            shp.to_file(filename=path2 + años[i] + Param_label_ODS632[j] + '_Res222.shp')
+            #shp.to_file(filename=path2 + años[i] + Param_label_ODS632[j] + '_Res222.shp')
+            shp2 = shp[["fid", "nunivotcda", "cocursodag", "cocdadesag", "max","Clase s/ res 222/02"]]
+            shp2.to_csv(path2 + años[i] + Param_label_ODS632[j] + '_zonal.csv')
