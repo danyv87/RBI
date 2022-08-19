@@ -19,32 +19,35 @@ def clip_tif(path_tifUTM_folder, path_out):
         input_raster2 = gdal.Translate(path_out + i[-8:], input_raster, projWin=extentRBI)
         precip_hist[i[-8:]]=tif_array
         input_raster2 = None
-    print("listo")
+    print("listo 1/4")
 
 #calcular media para anomalías
-def media_anomalia(shpcuenca,ChirpsUTM_clipped_folder):
+def media_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,anho_fin):
     list3 = glob.glob(ChirpsUTM_clipped_folder)
     shp = gpd.read_file(os.path.dirname(shpcuenca))
     sum=np.empty((27,17))
     precip_hist = {}
     for i in list3:
-         input_raster = gdal.Open(i)
-         tif_array = input_raster.ReadAsArray()
-         precip_hist[i[-8:-4]] = tif_array
-         affine2 = input_raster.GetGeoTransform()
-         input_raster = None
-         sum = precip_hist[i[-8:-4]] + sum
+        if int(i[-8:-4]) >= anho_inicio & int(i[-8:-4]) <= anho_fin:
+            input_raster = gdal.Open(i)
+            tif_array = input_raster.ReadAsArray()
+            precip_hist[i[-8:-4]] = tif_array
+            affine2 = input_raster.GetGeoTransform()
+            input_raster = None
+            sum = precip_hist[i[-8:-4]] + sum
     mean = sum/len(precip_hist)
     new_affine2 = Affine(affine2[1],affine2[2],affine2[0],affine2[4],affine2[5],affine2[3])
     stats = zonal_stats(shp, tif_array, affine=new_affine2, stats=["max"], all_touched=True)  # se asignan los valores maximos en la intersección con el shapefile
     stats = pd.DataFrame(stats)
+    print("listo 2/4")
     return stats
-    print("listo")
+
 
 #cálculo de anomalías
 def cal_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,stats,path_out):
     list3 = glob.glob(ChirpsUTM_clipped_folder)
     shp = gpd.read_file(os.path.dirname(shpcuenca))
+    no=0
     for i in list3:
         if int(i[-8:-4]) >= anho_inicio:
             #importar raster (clipped) para cálculo de anomalías
@@ -61,4 +64,7 @@ def cal_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,stats,path_out):
             anomalia = stats2 - stats
             #asignar resultados del cálculo de anomalía al shapefile y exportar como csv
             shp['max'] = anomalia['max']
-            shp.to_csv(path_out + i[-8:-4] + '_zonal.csv')
+            shp2 = shp[['nunivo_10','max']]
+            shp2.to_csv(path_out + 'CHIRPS_anomalia_' + i[-8:-4] + '.csv')
+            no = no + 1
+    print("listo 3/4")
