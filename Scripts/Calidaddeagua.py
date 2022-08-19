@@ -62,6 +62,7 @@ for i in range(len(años)):
             idw= gdal.Grid(path2 + años[i] + Param_label_ODS632[j] + '_UTM.tif',path2 + años[i] + Param_label_ODS632[j] + '_UTM.shp', zfield="valor",algorithm = "invdist:power=3:radius=15000",outputBounds=extentRBI,width = 100, height = 100)
             idw=[]
 
+
             #read shapefile
             shp = gpd.read_file(os.path.dirname(absolute_path) + "\\Shps\\Cursos_Otto4ZonalStats2_intersect.shp") #elegir aqui shp curso hídrico según pfastetter o el mismo pero segmentado/intersectado por subcuenca
             #shp = "C:\\Users\\danielal\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\Modelacion Ecohidrologica\\Proyecto_QGIS\\Tetis_Incremental\\layers\\Varios\\Cursos_Otto4ZonalStats2.shp"
@@ -81,7 +82,7 @@ for i in range(len(años)):
             new_affine2 = Affine(affine.a, affine.b, affine.c,affine.d, affine.e*-1, affine.f + (affine.e * (tif.read(1).shape[0]-1))) # leer https://github.com/perrygeo/python-rasterstats/issues/98
             #new_affine3 = Affine(affine2[1], affine2[2], affine2[0], affine2[4], affine2[5]*-1, affine2[3] + (affine2[5] * (tif_array2.shape[0]-1))) #https://github.com/perrygeo/python-rasterstats/issues/98
             #show(tif)
-            stats=zonal_stats(shp, tif_array_flipped , affine=new_affine2, stats=["max"],all_touched=True) #se asignan los valores maximos en la intersección con el shapefile
+            stats = zonal_stats(shp, tif_array_flipped , affine=new_affine2, stats=["max"],all_touched=True) #se asignan los valores maximos en la intersección con el shapefile
             stats = pd.DataFrame(stats)
             shp['max'] = stats['max']
             #shp.to_file(filename=path2 + años[i] + Param_label_ODS632[j] + '_zonal.shp')
