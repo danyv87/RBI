@@ -121,11 +121,11 @@ def calagua(shp_path,path_CEMITBD,path_out):
                     #shp['max'] = stats['max']
                 shp['Clase s/ res 222/02'] = stats['Clase s/ res 222/02']
                 #shp.to_file(filename=path2 + años[i] + Param_label_ODS632[j] + '_Res222.shp')
-                shp2 = shp[["fid", "nunivotcda", "cocursodag", "cocdadesag", "max","Clase s/ res 222/02"]]
-                shp2.to_csv(path_out + años[i] + Param_label_ODS632[j] + '_zonal.csv')
+                shp2 = shp[["cocursodag", "max","Clase s/ res 222/02"]]
+                shp2.to_csv(path_out + 'CEMIT_' + Param_label_ODS632[j] + '_' + años[i] + '.csv')
 
     test = os.listdir(path_out)
 
     for item in test:
-        if item.endswith(".zip"):
-            os.remove(item)
+        if not item.endswith(".csv"):
+            os.remove(path_out + item)
