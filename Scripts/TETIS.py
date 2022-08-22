@@ -13,7 +13,7 @@ path_out2 = generalpath + '\\csv_intermedio\\' #Aquí se escribirán los csvs in
 path_out3 = generalpath + '\\csv_tableau\\' #Aquí se escribirá el csv unificado para tableau
 
 #convertir tetis a csv
-list_var = ['FS4','P4','X1','X3','X4','X5']
+list_var = ['FS4','P4','Y1','Y2','Y3','Y4']
 tetis(shpcuenca,path_OutputASC_tetis,list_var,path_out2)
 
 #compilacion de csv para tableau
