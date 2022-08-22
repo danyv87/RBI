@@ -4,9 +4,11 @@
 from Scripts.SPI_funciones import *
 from Scripts.csv2tableau import *
 
-#definir paths
+#inputs
 shpcuenca = 'C:\\Users\\ASUS\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\Modelacion Ecohidrologica\\Proyecto_QGIS\\Tetis_Incremental\\layers\\Varios\\Ottopfasteter nivel 10.shp'
-generalpath = 'C:\\Users\\ASUS\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\RBI'
+
+#definir paths
+generalpath = 'C:\\Users\\ASUS\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\RBI\\Datos\\Chirps'
 path_tifUTM_folder = generalpath + '\\ChirpsUTM\\' + '*.tif' #Aquí se encuentran los tiffs de chirps convertidos a UTM
 path_out1 = generalpath + '\\ChirpsUTM_clipped\\' #Aquí se escribirán los tiffs de chirps cortados al extent de la RBI
 path_out2 = generalpath + '\\csv_intermedio\\' #Aquí se escribirán los csvs intermedios
