@@ -10,6 +10,14 @@ import wget
 import requests
 from bs4 import BeautifulSoup
 
+def reproject_tif(path_in,path_out):
+    list = glob.glob(path_in  + '*.tif')
+    for i in list:
+        input_raster = gdal.Open(i)
+        name = i.split('\\')[-1]
+        warp = gdal.Warp(path_out + name, input_raster, dstSRS='EPSG:32721')
+        warp = None  # Closes the files
+
 def download_annual_chirps(anho_ini,anho_fin,path_out):
     url_base = 'https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_annual/tifs/'
     page = requests.get(url_base)
@@ -23,10 +31,9 @@ def download_annual_chirps(anho_ini,anho_fin,path_out):
                 print(anho)
                 filename = wget.download(url_base + list(a)[0], out=path_out)
 
-
 #Clip y estadísticas
 def clip_tif(path_tifUTM_folder, path_out):
-    list2 = glob.glob(path_tifUTM_folder)
+    list2 = glob.glob(path_tifUTM_folder + '*.tif')
     precip_hist={}
     for i in list2:
         input_raster = gdal.Open(i)
@@ -43,7 +50,7 @@ def clip_tif(path_tifUTM_folder, path_out):
 #calcular media para anomalías
 def media_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,anho_fin):
     shp = gpd.read_file(os.path.dirname(shpcuenca))
-    list3 = glob.glob(ChirpsUTM_clipped_folder)
+    list3 = glob.glob(ChirpsUTM_clipped_folder + '*.tif')
     input_raster = gdal.Open(list3[0])
     sum=np.empty((input_raster.RasterYSize,input_raster.RasterXSize))
     input_raster = None
