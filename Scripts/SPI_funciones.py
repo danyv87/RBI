@@ -11,11 +11,11 @@ import requests
 from bs4 import BeautifulSoup
 
 def reproject_tif(path_in,path_out):
-    list = glob.glob(path_in  + '*.tif')
+    list = glob.glob(path_in + '*.tif')
     for i in list:
         input_raster = gdal.Open(i)
-        name = i.split('\\')[-1]
-        warp = gdal.Warp(path_out + name, input_raster, dstSRS='EPSG:32721')
+        name = i.split('\\')[-1].split('.')[-2]
+        warp = gdal.Warp(path_out + name + '.tif', input_raster, dstSRS='EPSG:32721')
         warp = None  # Closes the files
 
 def download_annual_chirps(anho_ini,anho_fin,path_out):
