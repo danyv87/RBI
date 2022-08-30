@@ -48,18 +48,18 @@ def tetis(shpcuenca,input_bulkdensity,path_OutputASC_tetis,list_var,path_out):
                 shp4 = shp[['nunivo_10', 'mean']]
                 shp4.to_csv(path_out + 'TETIS' + '_ErosionTNperHa_' + anho[:4] + '.csv')
 
-                Clasificacion = {
-                    'Class': ['Muy leve', 'Ligero', 'Moderado', 'Alto', 'Severo', 'Muy severo', 'Catastrófico'],
-                    'Erosion rate (t/ha)': ['<2', '2–5', '5–10', '10–50', '50–100', '100–500', '>500']}
-
-                shp.loc[shp['mean'].le(2), 'mean'] = 'Muy leve'
-                shp.loc[shp['mean'].ge(2) & shp['mean'].le(5), 'mean'] = 'Ligero'
-                shp.loc[shp['mean'].ge(5) & shp['mean'].le(10), 'mean'] = 'Moderado'
-                shp.loc[shp['mean'].ge(10) & shp['mean'].le(50), 'mean'] = 'Alto'
-                shp.loc[shp['mean'].ge(50) & shp['mean'].le(100), 'mean'] = 'Severo'
-                shp.loc[shp['mean'].ge(100) & shp['mean'].le(500), 'mean'] = 'Muy severo'
-                shp.loc[shp['mean'].ge(500), 'mean'] = 'Catastrofico'
-
-                # shp a csv
-                shp5 = shp[['nunivo_10', 'RatioErosion']]
-                shp5.to_csv(path_out + 'TETIS' + '_RatioErosion_' + anho[:4] + '.csv')
+                # Clasificacion = {
+                #     'Class': ['Muy leve', 'Ligero', 'Moderado', 'Alto', 'Severo', 'Muy severo', 'Catastrófico'],
+                #     'Erosion rate (t/ha)': ['<2', '2–5', '5–10', '10–50', '50–100', '100–500', '>500']}
+                #
+                # shp.loc[shp['mean'].le(2), 'mean'] = 'Muy leve'
+                # shp.loc[shp['mean'].ge(2) & shp['mean'].le(5), 'mean'] = 'Ligero'
+                # shp.loc[shp['mean'].ge(5) & shp['mean'].le(10), 'mean'] = 'Moderado'
+                # shp.loc[shp['mean'].ge(10) & shp['mean'].le(50), 'mean'] = 'Alto'
+                # shp.loc[shp['mean'].ge(50) & shp['mean'].le(100), 'mean'] = 'Severo'
+                # shp.loc[shp['mean'].ge(100) & shp['mean'].le(500), 'mean'] = 'Muy severo'
+                # shp.loc[shp['mean'].ge(500), 'mean'] = 'Catastrofico'
+                #
+                # # shp a csv
+                # shp5 = shp[['nunivo_10', 'RatioErosion']]
+                # shp5.to_csv(path_out + 'TETIS' + '_RatioErosion_' + anho[:4] + '.csv')
