@@ -73,11 +73,11 @@ def media_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,anho_fin):
     #cálculo de la desviación estandar
     for i in list3:
         if int(i[-8:-4]) >= anho_inicio & int(i[-8:-4]) <= anho_fin:
-            input_raster = gdal.Open(i)
-            tif_array = input_raster.ReadAsArray()
+            input_raster = rasterio.open(i)
+            tif_array = input_raster.read(1)
             precip_hist[i[-8:-4]] = tif_array
             input_raster = None
-            std = 1/i2+(precip_hist[i[-8:-4]] - mean)**2 + std
+            std = 1/i2 + (precip_hist[i[-8:-4]] - mean)**2 + std
     std2 = std**0.5
 
     stats = zonal_stats(shp, mean, affine=affine, stats=["mean"], all_touched=True)  # se asignan los valores maximos en la intersección con el shapefile

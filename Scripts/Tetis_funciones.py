@@ -19,7 +19,7 @@ def tetis(shpcuenca,input_bulkdensity,path_OutputASC_tetis,list_var,path_out):
             affine = input_raster.transform
 
             # cálculo de estadísticas sobre los resultados del tetis
-            stats2 = zonal_stats(shp, tif_array, affine=affine, stats=["mean"],nodata=None,
+            stats2 = zonal_stats(shp, tif_array, affine=affine, stats=["mean"],nodata=-9999,
                                  all_touched=True)  # se asignan los valores medios en la intersección con el shapefile
             stats2 = pd.DataFrame(stats2)
             shp['mean'] = stats2
@@ -36,7 +36,7 @@ def tetis(shpcuenca,input_bulkdensity,path_OutputASC_tetis,list_var,path_out):
             # clasificación por tasa de erosión
             if variable == "P4":
                 # zonal statistics
-                stats3 = zonal_stats(shp, tif_array2, affine=affine2, stats=["mean"],
+                stats3 = zonal_stats(shp, tif_array2, affine=affine2, stats=["mean"],nodata=-9999,
                                     all_touched=True)  # se asignan los valores maximos en la intersección con el shapefile
                 stats3 = pd.DataFrame(stats3)
                 shp['Bulkdensity_mean'] = stats3['mean']
