@@ -32,6 +32,7 @@ def media_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,anho_fin):
     std = np.empty((input_raster.RasterYSize, input_raster.RasterXSize))
     input_raster = None
     precip_hist = {}
+    #cálculo de la media
     for i in list3:
         if int(i[-8:-4]) >= anho_inicio & int(i[-8:-4]) <= anho_fin:
             input_raster = gdal.Open(i)
@@ -41,6 +42,7 @@ def media_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,anho_fin):
             input_raster = None
             sum = precip_hist[i[-8:-4]] + sum
     mean = sum/len(precip_hist)
+    #cálculo de la desviación estandar
     for i in list3:
         if int(i[-8:-4]) >= anho_inicio & int(i[-8:-4]) <= anho_fin:
             input_raster = gdal.Open(i)
@@ -58,7 +60,6 @@ def media_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,anho_fin):
     stats2b = pd.DataFrame(stats2b)
     print("listo 2/4")
     return stats, stats2b
-
 
 #cálculo de anomalías
 def cal_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,stats,stats2b,path_out):
