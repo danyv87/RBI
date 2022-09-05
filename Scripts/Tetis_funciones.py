@@ -45,6 +45,12 @@ def tetis(shpcuenca,input_bulkdensity,path_OutputASC_tetis,list_var,path_out):
                 bulkdensity = shp['Bulkdensity_mean']
                 ErosionTNperHa = bulkdensity * 1 / (270 * 270 / 1000) * shp2['mean']
                 shp['mean'] = ErosionTNperHa * -1 #mean es un campo estandar
+                #transformar de acumulado a incremental
+                if anho[:4] != '2014':
+                    print(anho[:4])
+                    df = pd.read_csv(path_out + 'TETIS_' + variable + '_' + str(int(anho[:4])-1) + '.csv')
+                    ErosionTNperHa = ErosionTNperHa - (bulkdensity * 1 / (270 * 270 / 1000) * df['mean'])
+                    shp['ErosionTNperHa'] = ErosionTNperHa * -1
                 shp4 = shp[['nunivo_10', 'mean']]
                 shp4.to_csv(path_out + 'TETIS' + '_ErosionTNperHa_' + anho[:4] + '.csv')
 

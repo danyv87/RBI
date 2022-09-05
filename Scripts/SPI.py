@@ -27,7 +27,7 @@ path_csv_tableau = generalpath + '\\csv_tableau\\' #Aquí se escribirá el csv u
 stats, stats2b = media_anomalia(shpcuenca,path_clipped,1981,2010)
 
 #cálculo de anomalías, desde anho_inicio en adelante y conversión a csv
-cal_anomalia(shpcuenca,path_clipped,2014,stats,stats2b,path_csv_interm)
+cal_anomalia(shpcuenca,path_clipped,2000,stats,stats2b,path_csv_interm)
 
 #Unificación de csv para tableau
 csv2tbl(path_csv_interm,'CHIRPS', path_csv_tableau)
