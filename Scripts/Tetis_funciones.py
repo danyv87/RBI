@@ -38,14 +38,14 @@ def tetis(shpcuenca,input_bulkdensity,path_OutputASC_tetis,list_var,path_out):
             #importar output TETIS
             tif_array_TETIS, affine_TETIS = rasterioimport(path_OutputASC_tetis + x)
             # cálculo de estadísticas sobre los resultados del TETIS
-            stats_TETIS = zonal_stats_RBI(shp_Otto10, tif_array_TETIS, affine_TETIS, -9999, path_out,'TETIS', variable, anho[:4],'noescribircsv')
+            stats_TETIS = zonal_stats_RBI(shp_Otto10, tif_array_TETIS, affine_TETIS, -9999, path_out,'TETIS', variable, anho[:4],'escribircsv')
             # clasificación por tasa de erosión
             if variable == "P4":
                 # operación para conversión de erosión en m3 a TN/Ha
                 ErosionTNperHa = stats_bulk['mean'] * 1 / (270 * 270 / 1000) * stats_TETIS['mean']
                 shp_Otto10['mean_Erosion'] = ErosionTNperHa * -1
                 shp_Otto10_v2 = shp_Otto10[['nunivo_10', 'mean_Erosion']]
-                shp_Otto10_v2.to_csv(path_out + 'TETIS' + '_' + variable + '_' + anho[:4] + '.csv')
+                shp_Otto10_v2.to_csv(path_out + 'TETIS' + '_' + 'ErosionTNperHa' + '_' + anho[:4] + '.csv')
                 print(variable + anho[:4])
                 #transformar de acumulado a incremental
                 if anho[:4] != '2014':
