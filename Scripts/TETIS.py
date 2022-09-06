@@ -17,7 +17,7 @@ ModEco_path = "C:\\Users\\danielal\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos
 tif_bulk = ModEco_path + "\\Tetis_InputsRecalculados\\bulk_UTM.tif"
 
 #convertir tetis a csv y clasificación por tasa de sedimentación
-list_var = ['P4','X1','X2','X3','X4','X5','X6'] #['FS4','P4','X1','X2','X3','X4','X5','X6','H1','H2','H3','H4','H5','H6','Y1','Y2','Y3','Y4']
+list_var = ['P4'] #['FS4','P4','X1','X2','X3','X4','X5','X6','H1','H2','H3','H4','H5','H6','Y1','Y2','Y3','Y4']
 tetis(shpcuenca,tif_bulk,path_OutputASC_tetis,list_var,path_out2)
 
 #compilacion de csv para tableau
