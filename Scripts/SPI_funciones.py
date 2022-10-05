@@ -49,7 +49,6 @@ def clip_tif(path_tifUTM_folder, path_out):
 
 #calcular media para anomalías
 def media_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,anho_fin):
-    shp = gpd.read_file(os.path.dirname(shpcuenca))
     list3 = glob.glob(ChirpsUTM_clipped_folder + '*.tif')
     input_raster = gdal.Open(list3[0])
     sum=np.empty((input_raster.RasterYSize,input_raster.RasterXSize))
@@ -77,6 +76,7 @@ def media_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,anho_fin):
             input_raster = None
             std = (precip_hist[i[-8:-4]] - mean)**2 + std
     std2 = (1/(i2-1) * std)**0.5
+    shp = gpd.read_file(os.path.dirname(shpcuenca))
     stats = zonal_stats(shp, mean, affine=affine, stats=["mean"], all_touched=True)  # se asignan los valores maximos en la intersección con el shapefile
     stats2b = zonal_stats(shp, std2, affine=affine, stats=["mean"], all_touched=True)  # se asignan los valores maximos en la intersección con el shapefile
     stats = pd.DataFrame(stats)
@@ -102,10 +102,12 @@ def cal_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,stats,stats2b,pa
             stats2 = pd.DataFrame(stats2)
             anomalia = stats2 - stats
             SPI = anomalia/stats2b
+
             #asignar resultados del cálculo de anomalía al shapefile y exportar como csv
             shp['mean'] = anomalia['mean']
             shp2 = shp[['nunivo_10','mean']]
             shp2.to_csv(path_out + 'CHIRPS_anomalia_' + i[-8:-4] + '.csv')
+
             shp['mean'] = SPI['mean']
             shp2 = shp[['nunivo_10', 'mean']]
             shp2.to_csv(path_out + 'CHIRPS_SPI_' + i[-8:-4] + '.csv')
