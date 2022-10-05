@@ -43,6 +43,7 @@ def clip_tif(path_tifUTM_folder, path_out):
                      7175202.8958083903416991] # Área de influencia margen derecha e izquierda
         input_raster2 = gdal.Translate(path_out + i[-8:], input_raster, projWin=extentIB_MDMI)
         precip_hist[i[-8:]]=tif_array
+        input_raster = None
         input_raster2 = None
     print("listo 1/4")
 
@@ -67,9 +68,6 @@ def media_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,anho_fin):
             sum = precip_hist[i[-8:-4]] + sum
             i2 = i2+1 
     mean = sum/i2
-    stats = zonal_stats(shp, tif_array, affine=affine, stats=["mean"],
-                        all_touched=True)  # se asignan los valores maximos en la intersección con el shapefile
-    mean = sum / len(precip_hist)
     #cálculo de la desviación estandar
     for i in list3:
         if int(i[-8:-4]) >= anho_inicio & int(i[-8:-4]) <= anho_fin:
@@ -77,14 +75,14 @@ def media_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,anho_fin):
             tif_array = input_raster.read(1)
             precip_hist[i[-8:-4]] = tif_array
             input_raster = None
-            std = 1/i2 + (precip_hist[i[-8:-4]] - mean)**2 + std
-    std2 = std**0.5
-
+            std = (precip_hist[i[-8:-4]] - mean)**2 + std
+    std2 = (1/(i2-1) * std)**0.5
     stats = zonal_stats(shp, mean, affine=affine, stats=["mean"], all_touched=True)  # se asignan los valores maximos en la intersección con el shapefile
     stats2b = zonal_stats(shp, std2, affine=affine, stats=["mean"], all_touched=True)  # se asignan los valores maximos en la intersección con el shapefile
     stats = pd.DataFrame(stats)
     stats2b = pd.DataFrame(stats2b)
     print("listo 2/4")
+    shp = None
     return stats, stats2b
 
 #cálculo de anomalías
@@ -97,14 +95,13 @@ def cal_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,stats,stats2b,pa
             #importar raster (clipped) para cálculo de anomalías
             input_raster = rasterio.open(i)
             tif_array = input_raster.read(1)
-            tif_array_flipped = np.flipud(tif_array)
             affine = input_raster.transform
             input_raster = None
             #cálculo de estadísticas
             stats2 = zonal_stats(shp, tif_array, affine=affine, stats=["mean"], all_touched=True)  # se asignan los valores maximos en la intersección con el shapefile
             stats2 = pd.DataFrame(stats2)
             anomalia = stats2 - stats
-            SPI = (stats2 - stats2b)/stats
+            SPI = anomalia/stats2b
             #asignar resultados del cálculo de anomalía al shapefile y exportar como csv
             shp['mean'] = anomalia['mean']
             shp2 = shp[['nunivo_10','mean']]
@@ -113,4 +110,33 @@ def cal_anomalia(shpcuenca,ChirpsUTM_clipped_folder,anho_inicio,stats,stats2b,pa
             shp2 = shp[['nunivo_10', 'mean']]
             shp2.to_csv(path_out + 'CHIRPS_SPI_' + i[-8:-4] + '.csv')
             no = no + 1
+
+            ## Indicadores SPI a tags
+            SPI.loc[SPI['mean'] > 2, 'Puntuacion'] = "extremadamente humedo"
+            SPI.loc[(SPI['mean'] > 1.5) & (SPI['mean'] < 1.99), 'Puntuacion'] = "muy humedo"
+            SPI.loc[(SPI['mean'] > 1.0) & (SPI['mean'] < 1.49), 'Puntuacion'] = "moderadamente humedo"
+            SPI.loc[(SPI['mean'] > -0.99) & (SPI['mean'] < 0.99), 'Puntuacion'] = "proximo a normal"
+            SPI.loc[(SPI['mean'] > -1.49) & (SPI['mean'] < -1), 'Puntuacion'] = "moderadamente seca"
+            SPI.loc[(SPI['mean'] > -1.99) & (SPI['mean'] < -1.5), 'Puntuacion'] = "muy seco"
+            SPI.loc[SPI['mean'] < -2, 'Puntuacion'] = "extremadamente seco"
+
+            shp['mean_tag'] = SPI['Puntuacion']
+            shp2 = shp[['nunivo_10', 'mean_tag']]
+            shp2.to_csv(path_out + 'CHIRPS_SPItag_' + i[-8:-4] + '.csv')
+
+            ## Tags a puntaje
+            SPI.loc[SPI['Puntuacion'] == "extremadamente humedo", 'Puntuacion2'] = 1
+            SPI.loc[SPI['Puntuacion'] == "muy humedo", 'Puntuacion2'] = 4
+            SPI.loc[SPI['Puntuacion'] == "moderadamente humedo", 'Puntuacion2'] = 7
+            SPI.loc[SPI['Puntuacion'] == "proximo a normal", 'Puntuacion2'] = 10
+            SPI.loc[SPI['Puntuacion'] == "moderadamente seca", 'Puntuacion2'] = 7
+            SPI.loc[SPI['Puntuacion'] == "muy seco", 'Puntuacion2'] = 4
+            SPI.loc[SPI['Puntuacion'] == "extremadamente seco", 'Puntuacion2'] = 4
+
+            shp['mean'] = SPI['Puntuacion2']
+            shp2 = shp[['nunivo_10', 'mean']]
+            shp2.to_csv(path_out + 'CHIRPS_SPIPuntuacion_' + i[-8:-4] + '.csv')
+
+            print (int(i[-8:-4]))
+
     print("listo 3/4")

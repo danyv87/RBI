@@ -49,11 +49,12 @@ def tetis(shpcuenca,input_bulkdensity,path_OutputASC_tetis,list_var,path_out):
                 print(variable + anho[:4])
                 #transformar de acumulado a incremental
                 if anho[:4] != '2014':
-                    df = pd.read_csv(path_out + 'TETIS_' + variable + '_' + str(int(anho[:4])-1) + '.csv') #año anterior para posterior resta del acumulado
-                    ErosionTNperHa = ErosionTNperHa - df['mean_Erosion']
-                    shp_Otto10['mean_Erosion'] = ErosionTNperHa * -1
+                    df = pd.read_csv(path_out + 'TETIS' + '_' + 'ErosionTNperHa' + '_' + str(int(anho[:4])-1) + '.csv') #año anterior para posterior resta del acumulado
+                    ErosionTNperHa = shp_Otto10['mean_Erosion'] - df['mean_Erosion']
+                    shp_Otto10['mean_Erosion'] = ErosionTNperHa
                     shp_Otto10_v3 = shp_Otto10[['nunivo_10', 'mean_Erosion']]
                     shp_Otto10_v3.to_csv(path_out + 'TETIS' + '_ErosionTNperHa_' + anho[:4] + '.csv')
+                    df = None
 
                 # Clasificacion = {
                 #     'Class': ['Muy leve', 'Ligero', 'Moderado', 'Alto', 'Severo', 'Muy severo', 'Catastrófico'],
