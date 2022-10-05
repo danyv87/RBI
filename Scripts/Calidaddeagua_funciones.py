@@ -124,6 +124,16 @@ def calagua(shp_path,path_CEMITBD,path_out):
                 shp2 = shp[["cocursodag", "max","Clase s/ res 222/02"]]
                 shp2.to_csv(path_out + 'CEMIT_' + Param_label_ODS632[j] + '_' + años[i] + '.csv')
 
+                ##  a puntaje
+                stats.loc[stats["Clase s/ res 222/02"] == "Clase1", 'ClasePuntaje'] = 10
+                stats.loc[stats["Clase s/ res 222/02"] == "Clase2", 'ClasePuntaje'] = 6.66
+                stats.loc[stats["Clase s/ res 222/02"] == "Clase3", 'ClasePuntaje'] = 3.33
+                stats.loc[stats["Clase s/ res 222/02"] == "Clase4", 'ClasePuntaje'] = 0
+
+                shp['ClasePuntaje'] = stats['ClasePuntaje']
+                shp2 = shp[["cocursodag", "ClasePuntaje"]]
+                shp2.to_csv(path_out + 'CEMIT_ClasePuntaje_' + años[i] + '.csv')
+
     test = os.listdir(path_out)
 
     for item in test:

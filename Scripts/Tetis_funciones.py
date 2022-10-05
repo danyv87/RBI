@@ -60,15 +60,26 @@ def tetis(shpcuenca,input_bulkdensity,path_OutputASC_tetis,list_var,path_out):
                 #     'Class': ['Muy leve', 'Ligero', 'Moderado', 'Alto', 'Severo', 'Muy severo', 'Catastrófico'],
                 #     'Erosion rate (t/ha)': ['<2', '2–5', '5–10', '10–50', '50–100', '100–500', '>500']}
                 #
-                # shp_Otto10.loc[shp_Otto10['mean'].le(2), 'mean'] = 'Muy leve'
-                # shp_Otto10.loc[shp_Otto10['mean'].ge(2) & shp_Otto10['mean'].le(5), 'mean'] = 'Ligero'
-                # shp_Otto10.loc[shp_Otto10['mean'].ge(5) & shp_Otto10['mean'].le(10), 'mean'] = 'Moderado'
-                # shp_Otto10.loc[shp_Otto10['mean'].ge(10) & shp_Otto10['mean'].le(50), 'mean'] = 'Alto'
-                # shp_Otto10.loc[shp_Otto10['mean'].ge(50) & shp_Otto10['mean'].le(100), 'mean'] = 'Severo'
-                # shp_Otto10.loc[shp_Otto10['mean'].ge(100) & shp_Otto10['mean'].le(500), 'mean'] = 'Muy severo'
-                # shp_Otto10.loc[shp_Otto10['mean'].ge(500), 'mean'] = 'Catastrofico'
-                #
-                # # shp_Otto10 a csv
-                # shp5 = shp_Otto10[['nunivo_10', 'RatioErosion']]
-                # shp5.to_csv(path_out + 'TETIS' + '_RatioErosion_' + anho[:4] + '.csv')
+                shp_Otto10.loc[(shp_Otto10['mean_Erosion'] > 2), 'RatioErosion'] = 'Muy leve'
+                shp_Otto10.loc[(shp_Otto10['mean_Erosion'] > 2) & (shp_Otto10['mean_Erosion'] < 5), 'RatioErosion'] = 'Ligero'
+                shp_Otto10.loc[(shp_Otto10['mean_Erosion'] > 5) & (shp_Otto10['mean_Erosion'] < 10), 'RatioErosion'] = 'Moderado'
+                shp_Otto10.loc[(shp_Otto10['mean_Erosion'] > 10) & (shp_Otto10['mean_Erosion'] < 50), 'RatioErosion'] = 'Alto'
+                shp_Otto10.loc[(shp_Otto10['mean_Erosion'] > 50) & (shp_Otto10['mean_Erosion'] < 100), 'RatioErosion'] = 'Severo'
+                shp_Otto10.loc[(shp_Otto10['mean_Erosion'] > 100) & (shp_Otto10['mean_Erosion'] < 500), 'RatioErosion'] = 'Muy severo'
+                shp_Otto10.loc[(shp_Otto10['mean_Erosion'] >500), 'RatioErosion'] = 'Catastrofico'
+
+                shp5 = shp_Otto10[['nunivo_10', 'RatioErosion']]
+                shp5.to_csv(path_out + 'TETIS' + '_RatioErosion_' + anho[:4] + '.csv')
+
+                ## Tags a puntaje
+                shp_Otto10.loc[shp_Otto10['RatioErosion'] == "Muy leve", 'RatioPuntaje'] = 10
+                shp_Otto10.loc[shp_Otto10['RatioErosion'] == "Ligero", 'RatioPuntaje'] = 9
+                shp_Otto10.loc[shp_Otto10['RatioErosion'] == "Moderado", 'RatioPuntaje'] = 8
+                shp_Otto10.loc[shp_Otto10['RatioErosion'] == "Alto", 'RatioPuntaje'] = 5
+                shp_Otto10.loc[shp_Otto10['RatioErosion'] == "Severo", 'RatioPuntaje'] = 4
+                shp_Otto10.loc[shp_Otto10['RatioErosion'] == "Muy severo", 'RatioPuntaje'] = 3
+                shp_Otto10.loc[shp_Otto10['RatioErosion'] == "Catastrofico", 'RatioPuntaje'] = 1
+
+                shp5 = shp_Otto10[['nunivo_10', 'RatioPuntaje']]
+                shp5.to_csv(path_out + 'TETIS' + '_RatioPuntaje_' + anho[:4] + '.csv')
 
