@@ -77,9 +77,9 @@ def calagua(shp_path,path_CEMITBD,path_out):
                 new_affine2 = Affine(affine.a, affine.b, affine.c,affine.d, affine.e*-1, affine.f + (affine.e * (tif.read(1).shape[0]-1))) # leer https://github.com/perrygeo/python-rasterstats/issues/98
                 #new_affine3 = Affine(affine2[1], affine2[2], affine2[0], affine2[4], affine2[5]*-1, affine2[3] + (affine2[5] * (tif_array2.shape[0]-1))) #https://github.com/perrygeo/python-rasterstats/issues/98
                 #show(tif)
-                stats = zonal_stats(shp, tif_array_flipped , affine=new_affine2, stats=["max"],all_touched=True) #se asignan los valores maximos en la intersección con el shapefile
+                stats = zonal_stats(shp, tif_array_flipped , affine=new_affine2, stats=["mean"],all_touched=True) #se asignan los valores valorimos en la intersección con el shapefile
                 stats = pd.DataFrame(stats)
-                shp['max'] = stats['max']
+                shp['valor'] = stats['mean']
                 #shp.to_file(filename=path2 + años[i] + Param_label_ODS632[j] + '_zonal.shp')
 
                 #definición de umbrales según resolución 222/02 de la SEAM http://www.mades.gov.py/wp-content/uploads/2019/05/Resolucion_222_02-Padr%C3%B3n-de-calidad-de-las-aguas.pdf
@@ -99,10 +99,10 @@ def calagua(shp_path,path_CEMITBD,path_out):
 
                 data3 = {
                     'Parametro':    ['DBO-5 (20º C)',                                 'Oxígeno Disuelto',                           'Turbidez',                                         'Color',                                        'pH',                                       'Fósforo Total',                                        'NTK'],
-                    'Clase1':       ['stats["max"].le(3)',                            'stats["max"].ge(6)',                         'stats["max"].le(40)',                              'stats["max"].le(15)',                          'stats["max"].ge(6) & stats["max"].le(9)',  'stats["max"].le(0.025)',                               'stats["max"].le(0.3)'],
-                    'Clase2':       ['stats["max"].ge(3) & stats["max"].le(5)',       'stats["max"].ge(5) & stats["max"].le(6)',    'stats["max"].ge(40) & stats["max"].le(100)',       'stats["max"].ge(15) & stats["max"].le(75)',    's/d',                                      'stats["max"].ge(0.025) & stats["max"].le(0.05)',       'stats["max"].ge(0.3) & stats["max"].le(0.6)'],
-                    'Clase3':       ['stats["max"].ge(5) & stats["max"].le(10)',      'stats["max"].ge(4) & stats["max"].le(5)',    'stats["max"].ge(40) & stats["max"].le(100)',       's/d',                                          's/d',                                      'stats["max"].ge(0.05)',                                'stats["max"].ge(0.6)'],
-                    'Clase4':       ['s/d',                                           'stats["max"].ge(2) & stats["max"].le(4)',    'stats["max"].ge(100)',                             's/d',                                          's/d',                                      's/d',                                                  's/d']}
+                    'Clase1':       ['stats["mean"].le(3)',                            'stats["mean"].ge(6)',                         'stats["mean"].le(40)',                              'stats["mean"].le(15)',                          'stats["mean"].ge(6) & stats["mean"].le(9)',  'stats["mean"].le(0.025)',                               'stats["mean"].le(0.3)'],
+                    'Clase2':       ['stats["mean"].ge(3) & stats["mean"].le(5)',       'stats["mean"].ge(5) & stats["mean"].le(6)',    'stats["mean"].ge(40) & stats["mean"].le(100)',       'stats["mean"].ge(15) & stats["mean"].le(75)',    's/d',                                      'stats["mean"].ge(0.025) & stats["mean"].le(0.05)',       'stats["mean"].ge(0.3) & stats["mean"].le(0.6)'],
+                    'Clase3':       ['stats["mean"].ge(5) & stats["mean"].le(10)',      'stats["mean"].ge(4) & stats["mean"].le(5)',    'stats["mean"].ge(40) & stats["mean"].le(100)',       's/d',                                          's/d',                                      'stats["mean"].ge(0.05)',                                'stats["mean"].ge(0.6)'],
+                    'Clase4':       ['s/d',                                           'stats["mean"].ge(2) & stats["mean"].le(4)',    'stats["mean"].ge(100)',                             's/d',                                          's/d',                                      's/d',                                                  's/d']}
 
                 umbrales_res222 = pd.DataFrame(data2)
 
@@ -118,20 +118,20 @@ def calagua(shp_path,path_CEMITBD,path_out):
                     exec('stats.loc[' + data3['Clase3'][j] + ', "Clase s/ res 222/02"] = "Clase3"')
                 if data3['Clase4'][j] != 's/d':
                     exec('stats.loc[' + data3['Clase4'][j] + ', "Clase s/ res 222/02"] = "Clase4"')
-                    #shp['max'] = stats['max']
+                    #shp['valor'] = stats['valor']
                 shp['Clase s/ res 222/02'] = stats['Clase s/ res 222/02']
                 #shp.to_file(filename=path2 + años[i] + Param_label_ODS632[j] + '_Res222.shp')
-                shp2 = shp[["cocursodag", "max","Clase s/ res 222/02"]]
+                shp2 = shp[["cocursodag", "valor","Clase s/ res 222/02"]]
                 shp2.to_csv(path_out + 'CEMIT_' + Param_label_ODS632[j] + '_' + años[i] + '.csv')
 
                 ##  a puntaje
-                stats.loc[stats["Clase s/ res 222/02"] == "Clase1", 'ClasePuntaje'] = 10
-                stats.loc[stats["Clase s/ res 222/02"] == "Clase2", 'ClasePuntaje'] = 6.66
-                stats.loc[stats["Clase s/ res 222/02"] == "Clase3", 'ClasePuntaje'] = 3.33
-                stats.loc[stats["Clase s/ res 222/02"] == "Clase4", 'ClasePuntaje'] = 0
+                stats.loc[stats["Clase s/ res 222/02"] == "Clase1", 'valor'] = 10
+                stats.loc[stats["Clase s/ res 222/02"] == "Clase2", 'valor'] = 6.66
+                stats.loc[stats["Clase s/ res 222/02"] == "Clase3", 'valor'] = 3.33
+                stats.loc[stats["Clase s/ res 222/02"] == "Clase4", 'valor'] = 0
 
-                shp['ClasePuntaje'] = stats['ClasePuntaje']
-                shp2 = shp[["cocursodag", "ClasePuntaje"]]
+                shp['valor'] = stats['valor']
+                shp2 = shp[["cocursodag", "valor"]]
                 shp2.to_csv(path_out + 'CEMIT_ClasePuntaje_' + años[i] + '.csv')
 
     test = os.listdir(path_out)
