@@ -60,7 +60,7 @@ def tetis(shpcuenca,input_bulkdensity,path_OutputASC_tetis,list_var,path_out):
                 #     'Class': ['Muy leve', 'Ligero', 'Moderado', 'Alto', 'Severo', 'Muy severo', 'Catastrófico'],
                 #     'Erosion rate (t/ha)': ['<2', '2–5', '5–10', '10–50', '50–100', '100–500', '>500']}
                 #
-                shp_Otto10.loc[(shp_Otto10['mean'] > 2), 'RatioErosion'] = 'Muy leve'
+                shp_Otto10.loc[(shp_Otto10['mean'] < 2), 'RatioErosion'] = 'Muy leve'
                 shp_Otto10.loc[(shp_Otto10['mean'] > 2) & (shp_Otto10['mean'] < 5), 'RatioErosion'] = 'Ligero'
                 shp_Otto10.loc[(shp_Otto10['mean'] > 5) & (shp_Otto10['mean'] < 10), 'RatioErosion'] = 'Moderado'
                 shp_Otto10.loc[(shp_Otto10['mean'] > 10) & (shp_Otto10['mean'] < 50), 'RatioErosion'] = 'Alto'
