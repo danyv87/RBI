@@ -20,11 +20,11 @@
 # affine1 = input_raster1.transform
 #
 # input_raster2 = rasterio.open(Match_2021MapB_Prioridad)
-# tif_array2 = input_raster2.read(1)
+# array_mapbiomas = input_raster2.read(1)
 # affine2 = input_raster2.transform
 #
 # stats = zonal_stats(shp_path, tif_array1, affine=affine1, categorical=True)  # se asignan los valores maximos en la intersección con el shapefile
-# stats2 = zonal_stats(shp_path, tif_array2, affine=affine2, categorical=True)  # se asignan los valores maximos en la intersección con el shapefile
+# stats2 = zonal_stats(shp_path, array_mapbiomas, affine=affine2, categorical=True)  # se asignan los valores maximos en la intersección con el shapefile
 #
 # statsb = pd.DataFrame(stats) #bina
 # stats2b = pd.DataFrame(stats2)
@@ -33,27 +33,52 @@
 from osgeo import gdal,gdal_array
 import numpy.ma as ma
 import numpy as np
-import matplotlib.pyplot as plt
+from rasterstats import zonal_stats
+import rasterio
+import glob
+import geopandas as gpd
+import pandas as pd
+from Scripts.csv2tableau import *
 
-# Open band 1 as array
-ds = gdal.Open('C:\\Users\\danielal\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\RBI\\Datos\\Biologia\\Mapbiomasbinario.tif')
-ds.GetRasterBand(1).SetNoDataValue(-9999)
-b1 = ds.GetRasterBand(1)
-arr = b1.ReadAsArray()
+from osgeo import gdal
 
+general_path = 'C:\\Users\\danielal\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\RBI'
+Mapbiomas_folder ='C:\\Users\\danielal\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\RBI\\Datos\\Mapbiomas\\'
+list = glob.glob(Mapbiomas_folder + '*.tif')
+PrioBiologica = 'C:\\Users\\danielal\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\RBI\\Datos\\Biologia\\Prioridad_masked.tif'
+shp_path = 'C:\\Users\\danielal\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\RBI\\Datos\\Shps\\Cuencas_Pfastetternivel10.shp'
+path_out2 = general_path + '\\csv_intermedio\\' #Aquí se escribirán los csvs intermedios
+path_out2b = general_path + '\\shps_intermedio\\' #Aquí se escribirán los csvs intermedios
+path_out3 = general_path + '\\csv_tableau\\' #Aquí se escribirá el csv unificado para tableau
+shp = gpd.read_file(shp_path)
 
-ds2 = gdal.Open('C:\\Users\\danielal\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\RBI\\Datos\\Biologia\\Prioridad_masked.tif')
-ds2.GetRasterBand(1).SetNoDataValue(-9999)
-b2 = ds2.GetRasterBand(1)
-arr2 = b2.ReadAsArray()
+input_raster = rasterio.open(PrioBiologica)
+arr_prioridad = input_raster.read(1)
 
+for i in list:
+    anho = i.split('\\')[-1].split('.')[-2]
+    input_raster2 = rasterio.open(i)
+    array_mapbiomas = input_raster2.read(1)
+    affine = input_raster2.transform
 
-# apply equation
-mx = ma.masked_array(arr2, mask=arr)*-5+5
-mx = ma.masked_array(mx.data, mask=np.invert(mx.mask)*1)*5+5
-mx[mx<0]=-9999
+    #cálculo del puntaje sobre conectibidad biológica
+    stats = zonal_stats(shp_path, array_mapbiomas , affine=affine2,stats=["mean"],all_touched=True)
+    #convertir raster mapbiomas a binario
+    array_mapbiomas[(array_mapbiomas == 3),(array_mapbiomas == 11),(array_mapbiomas == 12)] = 1
+    array_mapbiomas[(array_mapbiomas != 1)] = 0
 
+    #cáclulo de puntaje
+    array_puntajebiologia = ma.masked_array(arr_prioridad, mask=array_mapbiomas) * -10 + 10
+    array_puntajebiologia = ma.masked_array(array_puntajebiologia.data, mask=np.invert(array_puntajebiologia.mask) * 1) * 10
+    array_puntajebiologia[(array_puntajebiologia < 0),(array_puntajebiologia > 10)] = -9999
 
-gdal_array.SaveArray(mx.astype("float32"), 'C:\\Users\\danielal\\OneDrive - ITAIPU Binacional\\CIH\\Proyectos\\RBI\\Datos\\Shps\\puntuacionConectividad_multiplesEspecies2.tif', "GTIFF", ds)
-del ds
-del ds2
+    # tif a shp cuenca otto nivel 10
+    stats_bio = zonal_stats(shp_path, array_puntajebiologia, affine=affine, categorical=True)
+    stats2_bio = pd.DataFrame(stats_bio)
+    shp['mean'] = stats2_bio
+    shp2 = shp[["nunivo_10", "mean"]]
+
+    shp2.to_csv(path_out2 + 'Smithsonian_PuntBiologia_' + anho + '.csv')
+
+#compilacion de csv para tableau
+csv2tbl(path_out3,'Smithsonian', path_out2)
