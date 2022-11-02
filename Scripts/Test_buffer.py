@@ -52,11 +52,17 @@ for i in list:
     df_merged=pd.concat([stats3,stats3_emb],axis=1)
     shp3['mean'] = df_merged.max(axis=1)
     shp4 = shp3[["cocursodag", "mean"]]
-
     shp4.to_csv(path_out2 + 'Mapbiomas_PorcBosqCurso_' + año + '.csv')
+
+    shp3['mean'] = df_merged.max(axis=1)*10 #puntuación
+    shp4b = shp3[["cocursodag", "mean"]]
+
+
+    shp4b.to_csv(path_out2 + 'Mapbiomas_PuntajeBosqProt_' + año + '.csv')
     #shp4_emb.to_csv(path_out2 + 'Mapbiomas_PorcConectEmb_' + año + '.csv')
 
     #cálculo del % de bosques en cuencas
+    #calcula mal!!
     stats_cuenca = zonal_stats(shp_path4, tif_array, affine=affine, categorical=True)
     stats2_cue = pd.DataFrame(stats_cuenca)
     stats3_cue = stats2_cue[3] / (stats2_cue.sum(axis=1))

@@ -57,28 +57,28 @@ arr_prioridad = input_raster.read(1)
 
 for i in list:
     anho = i.split('\\')[-1].split('.')[-2]
-    input_raster2 = rasterio.open(i)
-    array_mapbiomas = input_raster2.read(1)
-    affine = input_raster2.transform
+    if anho != '2050':
+        input_raster2 = rasterio.open(i)
+        array_mapbiomas = input_raster2.read(1)
+        affine = input_raster2.transform
 
-    #cálculo del puntaje sobre conectibidad biológica
-    stats = zonal_stats(shp_path, array_mapbiomas , affine=affine2,stats=["mean"],all_touched=True)
-    #convertir raster mapbiomas a binario
-    array_mapbiomas[(array_mapbiomas == 3),(array_mapbiomas == 11),(array_mapbiomas == 12)] = 1
-    array_mapbiomas[(array_mapbiomas != 1)] = 0
+        #convertir raster mapbiomas a binario
+        array_mapbiomas[(array_mapbiomas == 3)|(array_mapbiomas == 11)|(array_mapbiomas == 12)] = 1
+        array_mapbiomas[(array_mapbiomas != 1)] = 0
 
-    #cáclulo de puntaje
-    array_puntajebiologia = ma.masked_array(arr_prioridad, mask=array_mapbiomas) * -10 + 10
-    array_puntajebiologia = ma.masked_array(array_puntajebiologia.data, mask=np.invert(array_puntajebiologia.mask) * 1) * 10
-    array_puntajebiologia[(array_puntajebiologia < 0),(array_puntajebiologia > 10)] = -9999
+        #cáclulo de puntaje
+        array_puntajebiologia = ma.masked_array(arr_prioridad, mask=array_mapbiomas) * -10 + 10
+        array_puntajebiologia = ma.masked_array(array_puntajebiologia.data, mask=np.invert(array_puntajebiologia.mask) * 1) * 5 + 5
+        array_puntajebiologia[(array_puntajebiologia < 0)|(array_puntajebiologia > 10)] = np.nan
 
-    # tif a shp cuenca otto nivel 10
-    stats_bio = zonal_stats(shp_path, array_puntajebiologia, affine=affine, categorical=True)
-    stats2_bio = pd.DataFrame(stats_bio)
-    shp['mean'] = stats2_bio
-    shp2 = shp[["nunivo_10", "mean"]]
-
-    shp2.to_csv(path_out2 + 'Smithsonian_PuntBiologia_' + anho + '.csv')
+        # tif a shp cuenca otto nivel 10
+        stats_bio = zonal_stats(shp_path, array_puntajebiologia, affine=affine, stats=["mean"], all_touched=True)
+        stats2_bio = pd.DataFrame(stats_bio)
+        shp['mean'] = stats2_bio
+        shp2 = shp[["nunivo_10", "mean"]]
+        shp2.to_csv(path_out2 + 'Smithsonian_PuntBiologia_' + anho + '.csv')
+        print(anho)
+        del input_raster2, array_mapbiomas
 
 #compilacion de csv para tableau
-csv2tbl(path_out3,'Smithsonian', path_out2)
+csv2tbl(path_out2,'Smithsonian', path_out3)
